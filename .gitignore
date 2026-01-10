@@ -1,0 +1,33 @@
+# Run this command to create .gitignore with good defaults
+@"
+# .NET Build / Output
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+*.cache
+**/.vs/
+**/packages/
+
+# NuGet
+*.nupkg
+*.snk
+
+# Logs / Temp
+*.log
+*.tmp
+Thumbs.db
+Desktop.ini
+
+# VS Code
+.vscode/
+
+# Personal settings
+appsettings.Development.json
+appsettings.json
+
+# Optional: Ignore migrations
+**/Migrations/*.cs
+"@ | Out-File -FilePath .gitignore -Encoding utf8
