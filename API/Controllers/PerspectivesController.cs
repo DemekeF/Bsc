@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Features.Perspectives.GetAll;
 using Application.Features.Perspectives.Create;
 using Application.Features.Perspectives.Common;
+using Application.DeletePerspective;
+
 
 [ApiController]                          // Tells ASP.NET: "This is an API controller"
 [Route("api/perspectives")]              // All endpoints start with /api/perspectives
@@ -11,7 +13,7 @@ public class PerspectivesController : ControllerBase
     private readonly IMediator _mediator;    // MediatR is injected automatically
 
     // Constructor - DI gives us MediatR instance
-    public PerspectivesController(IMediator mediator) 
+    public PerspectivesController(IMediator mediator)
         => _mediator = mediator;
 
     // GET /api/perspectives
@@ -41,4 +43,26 @@ public class PerspectivesController : ControllerBase
         // nameof(GetAll) creates link to /api/perspectives
         return CreatedAtAction(nameof(GetAll), new { id = dto.Id }, dto);
     }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdatePerspectiveCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("ID in URL does not match ID in body.");
+        }
+
+        await _mediator.Send(command);
+
+        return NoContent();
+    }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var command = new DeletePerspectiveCommand(id);
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+
+
 }

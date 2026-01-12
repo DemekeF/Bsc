@@ -30,6 +30,12 @@ public class PerspectiveRepository : IPerspectiveRepository
             perspective.Objectives?.Count ?? 0);
     }
 
+    public Task DeleteAsync(Perspective perspective)
+    {
+        _context.Perspectives.Remove(perspective);
+        return _context.SaveChangesAsync();
+    }
+
     public async Task<List<PerspectiveDto>> GetAllAsync(CancellationToken ct)
     {
         return await _context.Perspectives
@@ -41,5 +47,22 @@ public class PerspectiveRepository : IPerspectiveRepository
                 p.DefaultWeight,
                 p.Objectives.Count()))
             .ToListAsync(ct);
+    }
+
+
+    public async Task<Perspective?> GetByIdAsync(int id)
+    {
+        return await _context.Perspectives.FindAsync(id);
+    }
+
+    public Task<Perspective> GetByIdAsync(object id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task UpdateAsync(Perspective perspective)
+    {
+        _context.Perspectives.Update(perspective);
+        await _context.SaveChangesAsync();
     }
 }
