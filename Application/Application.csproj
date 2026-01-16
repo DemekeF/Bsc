@@ -12,6 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\Employee\" />
+    <Folder Include="Features\Employee\Commands\" />
+    <Folder Include="Features\Employee\Dtos\" />
+    <Folder Include="Features\Employee\Queries\" />
+    <Folder Include="Features\Employee\Queries\GetAllEmployees\" />
+    <Folder Include="Features\Employee\Queries\GetEmployeeById\" />
     <Folder Include="Features\Perspectives\Commands\UpdatePerspective\" />
   </ItemGroup>
 

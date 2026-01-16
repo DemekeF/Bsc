@@ -1,5 +1,6 @@
 using API.Behaviors;
-using Application.Features.Perspectives.Create; // For scanning validators & commands
+using Application.Common.Interfaces;
+using Application.Features.Perspectives.Create; // for assembly scanning
 using Application.Interfaces;
 using FluentValidation;
 using Infrastructure.Data;
@@ -8,37 +9,70 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ────────────────────────────────────────────────
+// Core Services
+// ────────────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Optional: HttpClient if needed later
-builder.Services.AddHttpClient();
-
-// Database (scoped lifetime)
+// ────────────────────────────────────────────────
+// Database
+// ────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BSCDB")));
 
-// Register repositories (scoped is best)
+// ────────────────────────────────────────────────
+// Repositories (scoped lifetime)
+// ────────────────────────────────────────────────
 builder.Services.AddScoped<IPerspectiveRepository, PerspectiveRepository>();
-// Add more repositories here later (OrgUnitRepository, etc.)
 
-// MediatR - ONLY scan Application layer for handlers & commands/queries
+// ────────────────────────────────────────────────
+// HttpClient + Repositories with SAP OData fixes
+// ────────────────────────────────────────────────
+
+// Common HttpClientHandler configuration for SAP (proxy bypass + self-signed cert + TLS)
+var sapHandler = new HttpClientHandler
+{
+    UseProxy = false,                                      // Bypass corporate proxy
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator, // DEV ONLY!
+    SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13
+};
+
+// Employee repository + client
+builder.Services.AddHttpClient<IEmployeeRepository, EmployeeRepository>(client =>
+{
+    client.BaseAddress = new Uri("https://eepers02.eep.com.et:8001/sap/opu/odata/sap/ZHR_ORGSTRUCT_DATA_SRV/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+}).ConfigurePrimaryHttpMessageHandler(() => sapHandler);
+
+// OrgUnit repository + client (same fixes)
+builder.Services.AddHttpClient<IOrgUnitRepository, OrgUnitRepository>(client =>
+{
+    client.BaseAddress = new Uri("https://eepers02.eep.com.et:8001/sap/opu/odata/sap/ZHR_ORGSTRUCT_DATA_SRV/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+}).ConfigurePrimaryHttpMessageHandler(() => sapHandler);
+
+// ────────────────────────────────────────────────
+// MediatR + Behaviors
+// ────────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssembly(typeof(CreatePerspectiveCommand).Assembly); // Application assembly only!
-    
-    // Optional: Add pipeline behaviors (validation, logging)
+    cfg.RegisterServicesFromAssembly(typeof(CreatePerspectiveCommand).Assembly);
+
+    // Your validation behavior
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
-// FluentValidation - scan validators from Application
+// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePerspectiveCommandValidator>();
 
+// ────────────────────────────────────────────────
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ────────────────────────────────────────────────
+// Pipeline
+// ────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -47,20 +81,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Optional: Global validation exception handling
+// Global validation exception handling
 app.Use(async (context, next) =>
 {
     try
     {
         await next();
     }
-    catch (ValidationException ex)
+    catch (FluentValidation.ValidationException ex)
     {
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        var errors = ex.Errors
-            .Select(e => new { Property = e.PropertyName, Error = e.ErrorMessage })
-            .ToList();
-
+        var errors = ex.Errors.Select(e => new { Property = e.PropertyName, Error = e.ErrorMessage });
         await context.Response.WriteAsJsonAsync(new { Errors = errors });
     }
 });
