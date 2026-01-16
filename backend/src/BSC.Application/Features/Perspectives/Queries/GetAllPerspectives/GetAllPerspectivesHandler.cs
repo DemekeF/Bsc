@@ -1,6 +1,6 @@
 using MediatR;
 using Application.Features.Perspectives.Common;
-using Application.Interfaces;
+using Application.Common.Interfaces;
 
 namespace Application.Features.Perspectives.GetAll;
 

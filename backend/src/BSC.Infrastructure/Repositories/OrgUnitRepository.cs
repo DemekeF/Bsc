@@ -17,30 +17,19 @@ namespace Infrastructure.Repositories
     {
         private readonly HttpClient _httpClient;
         private const string BaseUrl = "https://eepers02.eep.com.et:8001/sap/opu/odata/sap/ZHR_ORGSTRUCT_DATA_SRV/";
-
-        // public OrgUnitRepository(HttpClient httpClient)
-        // {
-        //     _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-
-        //     _httpClient.DefaultRequestHeaders.Accept.Add(
-        //         new MediaTypeWithQualityHeaderValue("application/json"));
-
-        //     var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("ep710143:Deme@2072"));
-        //     _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
-        // }
         private readonly IEmployeeRepository _employeeRepository;
 
-public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepository)
-{
-    _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-    _employeeRepository = employeeRepository ?? throw new ArgumentNullException(nameof(employeeRepository));
+        public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepository)
+        {
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _employeeRepository = employeeRepository ?? throw new ArgumentNullException(nameof(employeeRepository));
 
-    _httpClient.DefaultRequestHeaders.Accept.Add(
-        new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
 
-    var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("ep710143:Deme@2072"));
-    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
-}
+            var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("ep710143:Deme@2072"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
+        }
 
         public async Task<List<OrgUnitListDto>> GetAllOrgUnitsAsync(CancellationToken ct = default)
         {
@@ -63,56 +52,56 @@ public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepo
             return data == null ? null : MapToOrgUnitDetail(data);
         }
 
-       public async Task<OrgUnitTreeDto?> GetOrgUnitTreeAsync(string rootObjid, CancellationToken ct = default)
-{
-    var allUnits = await GetAllOrgUnitsAsync(ct);
-    if (allUnits.Count == 0) return null;
+        public async Task<OrgUnitTreeDto?> GetOrgUnitTreeAsync(string rootObjid, CancellationToken ct = default)
+        {
+            var allUnits = await GetAllOrgUnitsAsync(ct);
+            if (allUnits.Count == 0) return null;
 
-    // Fetch employees using the injected repository
-    var allEmployees = await _employeeRepository.GetAllEmployeesAsync(ct);
+            // Fetch employees using the injected repository
+            var allEmployees = await _employeeRepository.GetAllEmployeesAsync(ct);
 
-    // Group employees by Orgeh (Org Unit ID)
-    var employeesByOrgeh = allEmployees
-        .GroupBy(e => e.Orgeh ?? string.Empty)   // assuming EmployeeListDto has Orgeh property
-        .ToDictionary(g => g.Key, g => g.ToList());
+            // Group employees by Orgeh (Org Unit ID)
+            var employeesByOrgeh = allEmployees
+                .GroupBy(e => e.Orgeh ?? string.Empty)   // assuming EmployeeListDto has Orgeh property
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-    var lookup = allUnits
-        .GroupBy(u => u.Parentid)
-        .ToDictionary(g => g.Key, g => g.ToList());
+            var lookup = allUnits
+                .GroupBy(u => u.Parentid)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-    var root = allUnits.FirstOrDefault(u => u.Objid == rootObjid.PadLeft(8, '0'));
-    if (root == null) return null;
+            var root = allUnits.FirstOrDefault(u => u.Objid == rootObjid.PadLeft(8, '0'));
+            if (root == null) return null;
 
-    var tree = BuildTree(root, lookup, employeesByOrgeh);
-    return tree;
-}
+            var tree = BuildTree(root, lookup, employeesByOrgeh);
+            return tree;
+        }
 
-  private OrgUnitTreeDto BuildTree(
-    OrgUnitListDto node,
-    Dictionary<string, List<OrgUnitListDto>> unitLookup,
-    Dictionary<string, List<EmployeeListDto>> employeesByOrgeh)
-{
-    var treeNode = new OrgUnitTreeDto
-    {
-        Objid = node.Objid,
-        Short = node.Short,
-        Stext = node.Stext,
-        Level = node.Level,
-    };
+        private OrgUnitTreeDto BuildTree(
+          OrgUnitListDto node,
+          Dictionary<string, List<OrgUnitListDto>> unitLookup,
+          Dictionary<string, List<EmployeeListDto>> employeesByOrgeh)
+        {
+            var treeNode = new OrgUnitTreeDto
+            {
+                Objid = node.Objid,
+                Short = node.Short,
+                Stext = node.Stext,
+                Level = node.Level,
+            };
 
-    // Attach direct employees
-    if (employeesByOrgeh.TryGetValue(node.Objid, out var emps))
-    {
-        treeNode.Employees = emps;
-    }
+            // Attach direct employees
+            if (employeesByOrgeh.TryGetValue(node.Objid, out var emps))
+            {
+                treeNode.Employees = emps;
+            }
 
-    if (unitLookup.TryGetValue(node.Objid, out var children))
-    {
-        treeNode.Children = children.Select(c => BuildTree(c, unitLookup, employeesByOrgeh)).ToList();
-    }
+            if (unitLookup.TryGetValue(node.Objid, out var children))
+            {
+                treeNode.Children = children.Select(c => BuildTree(c, unitLookup, employeesByOrgeh)).ToList();
+            }
 
-    return treeNode;
-}
+            return treeNode;
+        }
 
 
 
@@ -124,11 +113,11 @@ public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepo
         {
             return items.Select(o => new OrgUnitListDto
             {
-                Objid    = o.Objid ?? "",
-                Short    = o.Short ?? "",
-                Stext    = o.Stext ?? "",
+                Objid = o.Objid ?? "",
+                Short = o.Short ?? "",
+                Stext = o.Stext ?? "",
                 Parentid = o.Parentid ?? "",
-                Level    = o.Level ?? 0
+                Level = o.Level ?? 0
             }).ToList();
         }
 
@@ -136,13 +125,13 @@ public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepo
         {
             return new OrgUnitDetailDto
             {
-                Objid    = o.Objid ?? "",
-                Short    = o.Short ?? "",
-                Stext    = o.Stext ?? "",
+                Objid = o.Objid ?? "",
+                Short = o.Short ?? "",
+                Stext = o.Stext ?? "",
                 Parentid = o.Parentid ?? "",
-                Level    = o.Level ?? 0,
+                Level = o.Level ?? 0,
                 ValidFrom = ParseSapDate(o.Begda),
-                ValidTo   = ParseSapDate(o.Endda)
+                ValidTo = ParseSapDate(o.Endda)
             };
         }
 
@@ -200,15 +189,15 @@ public OrgUnitRepository(HttpClient httpClient, IEmployeeRepository employeeRepo
 
         internal class OrgUnitData
         {
-            public string? Objid     { get; set; }
-            public int? Level        { get; set; }      // ← fixed: integer in JSON
-            public string? Parentid  { get; set; }      // ← confirmed from sample
-            public string? Otype     { get; set; }      // "O"
-            public string? Short     { get; set; }
-            public string? Stext     { get; set; }
-            public string? Begda     { get; set; }
-            public string? Endda     { get; set; }
-            public string? Sobid     { get; set; }      // empty in sample
+            public string? Objid { get; set; }
+            public int? Level { get; set; }      // ← fixed: integer in JSON
+            public string? Parentid { get; set; }      // ← confirmed from sample
+            public string? Otype { get; set; }      // "O"
+            public string? Short { get; set; }
+            public string? Stext { get; set; }
+            public string? Begda { get; set; }
+            public string? Endda { get; set; }
+            public string? Sobid { get; set; }      // empty in sample
             // ToSubOrgUnits is deferred → ignored here
         }
     }

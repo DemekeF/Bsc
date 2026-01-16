@@ -2,7 +2,7 @@ using MediatR;
 using Application.Common.Exceptions;
 
 using Domain.Entities;
-using Application.Interfaces;
+using Application.Common.Interfaces;
 
 public class UpdatePerspectiveCommandHandler
     : IRequestHandler<UpdatePerspectiveCommand>

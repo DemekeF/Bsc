@@ -1,7 +1,7 @@
 using API.Behaviors;
 using Application.Common.Interfaces;
 using Application.Features.Perspectives.Create; // for assembly scanning
-using Application.Interfaces;
+using Application.Common.Interfaces;
 using FluentValidation;
 using Infrastructure.Data;
 using Infrastructure.Repositories;

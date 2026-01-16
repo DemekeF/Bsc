@@ -31,7 +31,7 @@ export const routes: Routes = [
         component: EcommerceComponent,
         pathMatch: "full",
         title:
-          "Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template",
+          "Bsc Dashboard | BscAdmin - Angular Admin Dashboard Template",
       },
       {
         path: "calendar",

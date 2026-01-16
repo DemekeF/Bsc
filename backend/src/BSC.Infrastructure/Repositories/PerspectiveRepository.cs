@@ -1,4 +1,4 @@
-using Application.Interfaces;
+using Application.Common.Interfaces;
 using Application.Features.Perspectives.Common;
 using System.Linq;
 using Domain.Entities;
@@ -30,10 +30,10 @@ public class PerspectiveRepository : IPerspectiveRepository
             perspective.Objectives?.Count ?? 0);
     }
 
-    public Task DeleteAsync(Perspective perspective)
+    public Task DeleteAsync(Perspective perspective, CancellationToken ct = default)
     {
         _context.Perspectives.Remove(perspective);
-        return _context.SaveChangesAsync();
+        return _context.SaveChangesAsync(ct);
     }
 
     public async Task<List<PerspectiveDto>> GetAllAsync(CancellationToken ct)
@@ -50,19 +50,15 @@ public class PerspectiveRepository : IPerspectiveRepository
     }
 
 
-    public async Task<Perspective?> GetByIdAsync(int id)
+    public async Task<Perspective?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        return await _context.Perspectives.FindAsync(id);
+        var entry = await _context.Perspectives.FindAsync(new object[] { id }, ct);
+        return entry;
     }
 
-    public Task<Perspective> GetByIdAsync(object id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task UpdateAsync(Perspective perspective)
+    public async Task UpdateAsync(Perspective perspective, CancellationToken ct = default)
     {
         _context.Perspectives.Update(perspective);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 }

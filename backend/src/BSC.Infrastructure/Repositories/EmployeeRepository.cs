@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories
 
             // Basic Authentication (move to configuration/secrets in production)
             var auth = Convert.ToBase64String(Encoding.UTF8.GetBytes("ep710143:Deme@2072"));
-            _httpClient.DefaultRequestHeaders.Authorization = 
+            _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Basic", auth);
         }
 
@@ -70,37 +70,37 @@ namespace Infrastructure.Repositories
         //         : new List<EmployeeListDto>();
         // }
         public async Task<List<EmployeeListDto>> GetEmployeesByOrgehAsync(string orgeh, CancellationToken ct = default)
+        {
+            string formattedOrgeh = orgeh.Trim().PadLeft(8, '0');
+            string url = $"{BaseUrl}EmployeeSet?$format=json&$filter=Orgeh eq '{formattedOrgeh}'";
+
+            var response = await CallODataAsync<EmployeeListResponse>(url, ct);
+
+            return response?.D?.Results != null
+                ? MapToEmployeeList(response.D.Results)
+                : new List<EmployeeListDto>();
+        }
+        private List<EmployeeListDto> MapToEmployeeList(List<EmployeeData> sapEmployees)
+        {
+            return sapEmployees.Select(e => new EmployeeListDto
             {
-                string formattedOrgeh = orgeh.Trim().PadLeft(8, '0');
-                string url = $"{BaseUrl}EmployeeSet?$format=json&$filter=Orgeh eq '{formattedOrgeh}'";
-
-                var response = await CallODataAsync<EmployeeListResponse>(url, ct);
-
-                return response?.D?.Results != null
-                    ? MapToEmployeeList(response.D.Results)
-                    : new List<EmployeeListDto>();
-            }
-       private List<EmployeeListDto> MapToEmployeeList(List<EmployeeData> sapEmployees)
-                {
-                    return sapEmployees.Select(e => new EmployeeListDto
-                    {
-                        Pernr     = e.Pernr ?? "",
-                        Ename     = e.Ename ?? "",
-                        Orgeh     = e.Orgeh ?? "",   // ← add this mapping
-                        PositionId = e.Plans ?? ""
-                    }).ToList();
-                }
+                Pernr = e.Pernr ?? "",
+                Ename = e.Ename ?? "",
+                Orgeh = e.Orgeh ?? "",   // ← add this mapping
+                PositionId = e.Plans ?? ""
+            }).ToList();
+        }
 
         private static EmployeeDetailDto MapToEmployeeDetail(EmployeeData sapData)
         {
             return new EmployeeDetailDto
             {
-                Pernr        = sapData.Pernr  ?? string.Empty,
-                FirstName    = sapData.Vorna  ?? string.Empty,
-                LastName     = sapData.Nachn  ?? string.Empty,
-                Ename        = sapData.Ename  ?? string.Empty,
-                OrgUnitObjid = sapData.Orgeh  ?? string.Empty,
-                PositionId   = sapData.Plans  ?? string.Empty
+                Pernr = sapData.Pernr ?? string.Empty,
+                FirstName = sapData.Vorna ?? string.Empty,
+                LastName = sapData.Nachn ?? string.Empty,
+                Ename = sapData.Ename ?? string.Empty,
+                OrgUnitObjid = sapData.Orgeh ?? string.Empty,
+                PositionId = sapData.Plans ?? string.Empty
                 // Add more detailed fields here when available in OData
                 // Examples:
                 // Email        = sapData.Email ?? string.Empty,
@@ -155,12 +155,12 @@ namespace Infrastructure.Repositories
 
         internal class EmployeeData
         {
-            public string? Pernr  { get; set; }   // Personnel Number
-            public string? Ename  { get; set; }   // Employee Name (often full name)
-            public string? Vorna  { get; set; }   // First Name
-            public string? Nachn  { get; set; }   // Last Name
-            public string? Orgeh  { get; set; }   // Org Unit (Object ID)
-            public string? Plans  { get; set; }   // Position (Object ID)
+            public string? Pernr { get; set; }   // Personnel Number
+            public string? Ename { get; set; }   // Employee Name (often full name)
+            public string? Vorna { get; set; }   // First Name
+            public string? Nachn { get; set; }   // Last Name
+            public string? Orgeh { get; set; }   // Org Unit (Object ID)
+            public string? Plans { get; set; }   // Position (Object ID)
 
             // Add more properties here as they appear in your $metadata / real responses
             // public string? Email  { get; set; }

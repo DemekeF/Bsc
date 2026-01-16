@@ -2,7 +2,7 @@ using MediatR;
 
 using Domain.Entities;
 using Application.Features.Perspectives.Common;
-using Application.Interfaces;
+using Application.Common.Interfaces;
 
 namespace Application.Features.Perspectives.Create;
 

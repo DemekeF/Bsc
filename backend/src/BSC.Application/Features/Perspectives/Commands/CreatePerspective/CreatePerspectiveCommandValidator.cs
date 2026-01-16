@@ -1,5 +1,5 @@
 
-using Application.Interfaces;
+using Application.Common.Interfaces;
 using FluentValidation;
 
 namespace Application.Features.Perspectives.Create
