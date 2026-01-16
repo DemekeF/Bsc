@@ -1,0 +1,103 @@
+/* HEADER */
+.header-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  margin: 0;
+}
+
+.red h2 {
+  color: #dc2626;
+}
+.yellow h2 {
+  color: #ca8a04;
+}
+.orange h2 {
+  color: #ea580c;
+}
+
+/* TABLE */
+.scorecard {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.scorecard th,
+.scorecard td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.center {
+  text-align: center;
+}
+
+.perspective {
+  background: #dbeafe;
+  font-weight: bold;
+}
+
+.objective {
+  background: #f3f4f6;
+  padding-left: 20px;
+}
+
+.kpi td:first-child {
+  padding-left: 40px;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.link {
+  color: #2563eb;
+}
+
+/* STATUS BADGE */
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 12px;
+}
+
+.green {
+  background: #16a34a;
+}
+.red {
+  background: #dc2626;
+}
+
+/* DRAWER */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: 100%;
+  background: white;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

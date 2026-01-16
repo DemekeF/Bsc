@@ -1,0 +1,63 @@
+<div class="bg-white shadow rounded p-4 overflow-x-auto">
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-semibold">KPI Dashboard</h2>
+
+    <div class="flex gap-2">
+      <select class="border rounded px-2 py-1 text-sm">
+        <option>Select Department</option>
+        <option>Finance</option>
+        <option>HR</option>
+      </select>
+
+      <button class="px-3 py-1 rounded bg-blue-500 text-white text-sm">
+        Daily
+      </button>
+      <button class="px-3 py-1 rounded border text-sm">Weekly</button>
+      <button class="px-3 py-1 rounded border text-sm">Monthly</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <table class="min-w-full text-sm border">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-2 text-left w-64">Improvement Priority</th>
+        <th class="p-2">Act</th>
+        <th class="p-2">Goal</th>
+        <th *ngFor="let d of days" class="p-2 text-center">
+          {{ d }}
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <ng-container *ngFor="let row of kpis">
+        <!-- PARENT -->
+        <tr class="bg-blue-50 font-semibold">
+          <td class="p-2 cursor-pointer" (click)="toggle(row)">
+            {{ row.name }}
+          </td>
+          <td colspan="100"></td>
+        </tr>
+
+        <!-- CHILD -->
+        <ng-container *ngIf="isExpanded(row)">
+          <tr *ngFor="let c of row.children">
+            <td class="p-2 pl-6">{{ c.name }}</td>
+            <td class="p-2 text-center">{{ c.actual }}</td>
+            <td class="p-2 text-center">{{ c.target }}</td>
+
+            <td
+              *ngFor="let v of c.values"
+              class="p-1 text-center text-white text-xs"
+              [class]="cellColor(v, c.target)"
+            >
+              {{ v }}
+            </td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</div>
